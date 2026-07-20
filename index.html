@@ -239,6 +239,10 @@
 
     <form id="rsvpForm" onsubmit="handleSubmit(event)">
       <div class="field">
+        <label for="nameInput">👤 Pangalan mo?</label>
+        <input type="text" id="nameInput" placeholder="e.g. Jun" required>
+      </div>
+      <div class="field">
         <label for="whenInput">🗓️ Kailan?</label>
         <input type="datetime-local" id="whenInput" required>
       </div>
@@ -282,6 +286,7 @@
   function handleSubmit(event) {
     event.preventDefault();
 
+    const name = document.getElementById('nameInput').value;
     const whenRaw = document.getElementById('whenInput').value;
     const where = document.getElementById('whereInput').value;
 
@@ -302,6 +307,7 @@
     const message =
 `🍻 SHOT NA GUYS! 🍻
 
+👤 Sino: ${name}
 🗓️ Kailan: ${whenFormatted}
 📍 Saan: ${where}
 
