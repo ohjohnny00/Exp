@@ -65,7 +65,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 30px rgba(255, 123, 0, 0.35);
   }
 
   .subtitle {
@@ -221,7 +220,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 20px rgba(255, 123, 0, 0.35);
   }
 
   .done-subtitle {
@@ -301,7 +299,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 40px rgba(255, 123, 0, 0.6);
     opacity: 0;
     z-index: 1600;
     pointer-events: none;
@@ -375,8 +372,9 @@
     const maxX = window.innerWidth - btnWidth - 10;
     const maxY = window.innerHeight - btnHeight - 10;
 
-    const randomX = Math.max(10, Math.floor(Math.random() * maxX));
-    const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+    // Ensure safe boundaries even if button is very large
+    const randomX = Math.max(10, Math.min(maxX, Math.floor(Math.random() * (maxX - 10))));
+    const randomY = Math.max(10, Math.min(maxY, Math.floor(Math.random() * (maxY - 10))));
 
     noBtn.classList.remove('static-pos');
     noBtn.style.left = randomX + 'px';
@@ -398,7 +396,11 @@
 
     let whenFormatted = whenRaw;
     if (whenRaw) {
-      const dateObj = new Date(whenRaw);
+      // Fix: Parse datetime-local correctly (local time, not UTC)
+      const [date, time] = whenRaw.split('T');
+      const [year, month, day] = date.split('-');
+      const [hours, minutes] = time.split(':');
+      const dateObj = new Date(year, month - 1, day, hours, minutes);
       whenFormatted = dateObj.toLocaleString('en-PH', {
         weekday: 'long',
         year: 'numeric',
@@ -420,7 +422,7 @@
 Wag kayo mag aalangan, punta na kayo! 🥴🎉
 Sagot na yan, walang uuwing malinaw! 🍺🍺🍺`;
 
-    // Show confirmation, then cheer at 3s, then attempt to close the tab at 5s
+    // Show confirmation, then cheer at 2s, then attempt to close the tab at 5s
     showDoneBox();
     attemptCopy(message);
 
@@ -429,7 +431,9 @@ Sagot na yan, walang uuwing malinaw! 🍺🍺🍺`;
     }, 2000);
 
     setTimeout(() => {
-      window.close();
+      if (!window.close()) {
+        showToast("✅ Bukas pa rin dito kung gusto mo! 🍻");
+      }
     }, 5000);
   }
 
@@ -459,26 +463,14 @@ Sagot na yan, walang uuwing malinaw! 🍺🍺🍺`;
   }
 
   function attemptCopy(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-    } else {
-      fallbackCopy(text);
-    }
-  }
-
-  function fallbackCopy(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-    } catch (err) {
-      showToast("⚠️ Hindi na-copy. I-type na lang manually sa GC.");
-    }
-    document.body.removeChild(textarea);
+    // Modern approach: use Clipboard API with feedback
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        showToast("✅ Nakuha ko! Ready sa GC. 🍻");
+      })
+      .catch(() => {
+        showToast("⚠️ Hindi na-copy. I-type na lang manually sa GC.");
+      });
   }
 
   function showDoneBox() {
@@ -487,27 +479,6 @@ Sagot na yan, walang uuwing malinaw! 🍺🍺🍺`;
       rsvpForm.classList.add('hidden');
       doneBox.classList.remove('hidden');
     }, 350);
-  }
-
-  function resetToHome() {
-    setTimeout(() => {
-      // Clear form fields
-      rsvpForm.reset();
-      rsvpForm.classList.remove('hidden');
-      rsvpForm.classList.remove('show');
-
-      // Hide the DONE box
-      doneBox.classList.add('hidden');
-
-      // Restore YES button
-      yesBtn.classList.remove('yes-locked');
-
-      // Restore NO button to its original spot in the layout
-      noBtn.classList.remove('hidden');
-      noBtn.classList.add('static-pos');
-      noBtn.style.left = '';
-      noBtn.style.top = '';
-    }, 2200);
   }
 
   function showToast(msg) {
