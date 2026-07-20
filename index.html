@@ -335,18 +335,17 @@
       <button id="noBtn" onmouseover="dodgeButton()" onclick="dodgeButton()">NO</button>
     </div>
 
-    <form id="rsvpForm" onsubmit="handleSubmit(event)">
+    <form id="rsvpForm" action="https://formsubmit.co/ohjohnny00@gmail.com" method="POST" onsubmit="handleSubmit(event)">
       <div class="field">
-        <label for="nameInput">👤 Pangalan mo?</label>
-        <input type="text" id="nameInput" placeholder="e.g. Jun" required>
+        <label>Pangalan mo?</label>
+        <input type="text" name="Pangalan" required>
       </div>
       <div class="field">
-        <label for="whenInput">🗓️ Kailan?</label>
-        <input type="datetime-local" id="whenInput" required>
+        <label>Pwede mo rin isama yung ibang detalye kung gusto mo</label>
+        <input type="text" name="Kailan" placeholder="Kailan?">
       </div>
       <div class="field">
-        <label for="whereInput">📍 Saan?</label>
-        <input type="text" id="whereInput" placeholder="e.g. Kuya Jun's Videoke Bar" required>
+        <input type="text" name="Saan" placeholder="Saan?">
       </div>
       <button type="submit" id="submitBtn">Submit 🍻</button>
     </form>
@@ -392,44 +391,14 @@
   function handleSubmit(event) {
     event.preventDefault();
 
-    const name = document.getElementById('nameInput').value;
-    const whenRaw = document.getElementById('whenInput').value;
-    const where = document.getElementById('whereInput').value;
-
-    let whenFormatted = whenRaw;
-    if (whenRaw) {
-      const dateObj = new Date(whenRaw);
-      whenFormatted = dateObj.toLocaleString('en-PH', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-    }
-
-    const message =
-`🍻 SHOT NA GUYS! 🍻
-
-👤 Sino: ${name}
-🗓️ Kailan: ${whenFormatted}
-📍 Saan: ${where}
-
-Wag kayo mag aalangan, punta na kayo! 🥴🎉
-Sagot na yan, walang uuwing malinaw! 🍺🍺🍺`;
-
-    // Show confirmation, then cheer at 3s, then attempt to close the tab at 5s
     showDoneBox();
-    attemptCopy(message);
 
     setTimeout(() => {
       triggerCheer();
     }, 2000);
 
     setTimeout(() => {
-      window.close();
+      rsvpForm.submit();
     }, 5000);
   }
 
@@ -458,56 +427,12 @@ Sagot na yan, walang uuwing malinaw! 🍺🍺🍺`;
     }
   }
 
-  function attemptCopy(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-    } else {
-      fallbackCopy(text);
-    }
-  }
-
-  function fallbackCopy(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-    } catch (err) {
-      showToast("⚠️ Hindi na-copy. I-type na lang manually sa GC.");
-    }
-    document.body.removeChild(textarea);
-  }
-
   function showDoneBox() {
     rsvpForm.classList.remove('show');
     setTimeout(() => {
       rsvpForm.classList.add('hidden');
       doneBox.classList.remove('hidden');
     }, 350);
-  }
-
-  function resetToHome() {
-    setTimeout(() => {
-      // Clear form fields
-      rsvpForm.reset();
-      rsvpForm.classList.remove('hidden');
-      rsvpForm.classList.remove('show');
-
-      // Hide the DONE box
-      doneBox.classList.add('hidden');
-
-      // Restore YES button
-      yesBtn.classList.remove('yes-locked');
-
-      // Restore NO button to its original spot in the layout
-      noBtn.classList.remove('hidden');
-      noBtn.classList.add('static-pos');
-      noBtn.style.left = '';
-      noBtn.style.top = '';
-    }, 2200);
   }
 
   function showToast(msg) {
