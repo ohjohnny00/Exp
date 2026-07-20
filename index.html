@@ -137,7 +137,7 @@
 
   #rsvpForm.show {
     opacity: 1;
-    max-height: 500px;
+    max-height: 600px;
   }
 
   .field {
@@ -337,16 +337,16 @@
 
     <form id="rsvpForm" onsubmit="handleSubmit(event)">
       <div class="field">
-        <label>Pangalan mo?</label>
-        <input type="text" id="nameInput" name="Pangalan" placeholder="e.g. Jun" required>
+        <label for="nameInput">👤 Pangalan mo?</label>
+        <input type="text" id="nameInput" placeholder="e.g. Jun" required>
       </div>
       <div class="field">
-        <label>Kailan?</label>
-        <input type="text" id="kailan" name="Kailan" placeholder="Kailan?" required>
+        <label for="whenInput">🗓️ Kailan?</label>
+        <input type="datetime-local" id="whenInput" required>
       </div>
       <div class="field">
-        <label>Saan?</label>
-        <input type="text" id="saan" name="Saan" placeholder="Saan?" required>
+        <label for="whereInput">📍 Saan?</label>
+        <input type="text" id="whereInput" placeholder="e.g. Kuya Jun's Videoke Bar" required>
       </div>
       <button type="submit" id="submitBtn">Submit 🍻</button>
     </form>
@@ -393,16 +393,30 @@
     event.preventDefault();
 
     const name = document.getElementById('nameInput').value;
-    const kailan = document.getElementById('kailan').value;
-    const saan = document.getElementById('saan').value;
+    const whenRaw = document.getElementById('whenInput').value;
+    const where = document.getElementById('whereInput').value;
+
+    let whenFormatted = whenRaw;
+    if (whenRaw) {
+      const dateObj = new Date(whenRaw);
+      whenFormatted = dateObj.toLocaleString('en-PH', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
 
     const message =
 `🍻 SHOT NA! 🍻
 ━━━━━━━━━━━━━━━━━━━
 
 👤 Sino: ${name}
-📅 Kailan: ${kailan}
-📍 Saan: ${saan}
+📅 Kailan: ${whenFormatted}
+📍 Saan: ${where}
 
 ━━━━━━━━━━━━━━━━━━━
 Wag Kang Paasa! Pumunta ka! 💪
